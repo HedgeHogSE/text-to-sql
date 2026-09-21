@@ -1,0 +1,70 @@
+# >>> Comet managed project state >>>
+/.comet/
+!/.comet/config.yaml
+# <<< Comet managed project state <<<
+
+# Maven build output
+/target/
+!.gitignore
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.bak
+
+# Spring Boot
+application-local.yml
+application-dev.yml
+application-prod.yml
+
+# Database
+*.sqlite
+*.db
+*.h2.db
+
+# Coverage reports
+coverage/
+jacoco/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# ai
+.codegraph/
+.comet/
+.kilo/
+.kilocode/
+.qwen/
+
+docs/
