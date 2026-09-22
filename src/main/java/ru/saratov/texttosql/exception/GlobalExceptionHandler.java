@@ -1,5 +1,6 @@
 package ru.saratov.texttosql.exception;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +34,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleSqlSecurity(SqlSecurityException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(
                 "Security violation",
+                ex.getMessage(),
+                LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleDataAccess(DataAccessException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
+                "Database error",
                 ex.getMessage(),
                 LocalDateTime.now()
         ));

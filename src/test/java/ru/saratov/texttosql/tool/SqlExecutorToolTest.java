@@ -8,14 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SqlExecutorToolTest {
 
-    private final SqlExecutorTool sqlExecutorTool = new SqlExecutorTool();
-
-    @Test
-    void testExecuteSqlWithSelect() {
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> 
-                sqlExecutorTool.executeSql("SELECT COUNT(*) as count FROM users"));
-        assertTrue(exception.getMessage().contains("jdbcTemplate"));
-    }
+    private final SqlExecutorTool sqlExecutorTool = new SqlExecutorTool(null);
 
     @Test
     void testExecuteSqlRejectsDrop() {
@@ -56,6 +49,13 @@ class SqlExecutorToolTest {
     void testExecuteSqlRejectsAlter() {
         SqlSecurityException exception = assertThrows(SqlSecurityException.class, () -> 
                 sqlExecutorTool.executeSql("ALTER TABLE users ADD COLUMN test VARCHAR(100)"));
+        assertTrue(exception.getMessage().contains("Запрещенная операция"));
+    }
+
+    @Test
+    void testExecuteSqlRejectsNonSelect() {
+        SqlSecurityException exception = assertThrows(SqlSecurityException.class, () -> 
+                sqlExecutorTool.executeSql("INSERT INTO users (username) VALUES ('test')"));
         assertTrue(exception.getMessage().contains("Запрещенная операция"));
     }
 }

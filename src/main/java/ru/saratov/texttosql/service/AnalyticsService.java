@@ -44,7 +44,7 @@ public class AnalyticsService {
 
     private String formatResult(String sql, String question, List<Map<String, Object>> result) {
         if (result == null || result.isEmpty()) {
-            return "Нет данных, удовлетворяющих запросу.";
+            return "Пустой результат";
         }
 
         String sqlUpper = sql.toUpperCase();
@@ -53,9 +53,9 @@ public class AnalyticsService {
 
         if (result.size() == 1) {
             Map<String, Object> row = result.get(0);
-            if (row.size() == 1) {
+if (row.size() == 1) {
                 Object value = row.values().iterator().next();
-                if (value == null) return "Нет данных";
+                if (value == null) return "Пустой результат";
 
                 return formatSingleValue(aggType, city, value.toString());
             }

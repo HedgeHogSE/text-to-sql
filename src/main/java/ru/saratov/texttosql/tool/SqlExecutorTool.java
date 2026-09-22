@@ -1,11 +1,9 @@
 package ru.saratov.texttosql.tool;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.saratov.texttosql.config.TimeoutJdbcTemplate;
 import ru.saratov.texttosql.exception.InvalidSqlException;
 import ru.saratov.texttosql.exception.SqlSecurityException;
-import ru.saratov.texttosql.exception.SqlTimeoutException;
 
 import java.util.List;
 import java.util.Map;
@@ -13,18 +11,25 @@ import java.util.Map;
 @Component
 public class SqlExecutorTool {
 
-    private JdbcTemplate jdbcTemplate;
+    private final TimeoutJdbcTemplate timeoutJdbcTemplate;
 
-    private static final int QUERY_TIMEOUT_SECONDS = 10;
     private static final int MAX_RESULT_LIMIT = 100;
 
-    @Autowired
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public SqlExecutorTool(TimeoutJdbcTemplate timeoutJdbcTemplate) {
+        this.timeoutJdbcTemplate = timeoutJdbcTemplate;
     }
 
     public List<Map<String, Object>> executeSql(String sql) {
         String normalized = sql.trim().toUpperCase();
+
+        if (!normalized.startsWith("SELECT")) {
+            if (normalized.contains("DROP") || normalized.contains("DELETE") 
+                    || normalized.contains("UPDATE") || normalized.contains("INSERT")
+                    || normalized.contains("TRUNCATE") || normalized.contains("ALTER")) {
+                throw new SqlSecurityException("Запрещенная операция: модифицирующие запросы заблокированы");
+            }
+            throw new InvalidSqlException("Разрешены только SELECT-запросы");
+        }
 
         if (normalized.contains("DROP") || normalized.contains("DELETE") 
                 || normalized.contains("UPDATE") || normalized.contains("INSERT")
@@ -32,15 +37,11 @@ public class SqlExecutorTool {
             throw new SqlSecurityException("Запрещенная операция: модифицирующие запросы заблокированы");
         }
 
-        if (!normalized.startsWith("SELECT")) {
-            throw new InvalidSqlException("Разрешены только SELECT-запросы");
+        String querySql = sql;
+        if (!normalized.contains("LIMIT")) {
+            querySql = sql.replaceFirst(";\\s*$", "") + " LIMIT " + MAX_RESULT_LIMIT;
         }
 
-        if (normalized.contains("LIMIT")) {
-            return jdbcTemplate.queryForList(sql);
-        }
-
-        String limitedSql = sql.replaceFirst(";\\s*$", "") + " LIMIT " + MAX_RESULT_LIMIT;
-        return jdbcTemplate.queryForList(limitedSql);
+        return timeoutJdbcTemplate.queryForList(querySql);
     }
 }
