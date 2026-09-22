@@ -1,39 +1,49 @@
 package ru.saratov.texttosql.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.saratov.texttosql.dto.ErrorResponse;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body(Map.of(
-                "error", "Invalid request",
-                "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now().toString()
+    @ExceptionHandler(InvalidSqlException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidSql(InvalidSqlException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(
+                "Invalid SQL",
+                ex.getMessage(),
+                LocalDateTime.now()
         ));
     }
 
-    @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity<Map<String, Object>> handleUnsupportedOperation(UnsupportedOperationException ex) {
-        return ResponseEntity.status(501).body(Map.of(
-                "error", "Not implemented",
-                "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now().toString()
+    @ExceptionHandler(SqlTimeoutException.class)
+    public ResponseEntity<ErrorResponse> handleSqlTimeout(SqlTimeoutException ex) {
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(new ErrorResponse(
+                "Query timeout",
+                ex.getMessage(),
+                LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(SqlSecurityException.class)
+    public ResponseEntity<ErrorResponse> handleSqlSecurity(SqlSecurityException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(
+                "Security violation",
+                ex.getMessage(),
+                LocalDateTime.now()
         ));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        return ResponseEntity.internalServerError().body(Map.of(
-                "error", "Internal server error",
-                "message", ex.getMessage(),
-                "timestamp", LocalDateTime.now().toString()
+    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
+        return ResponseEntity.internalServerError().body(new ErrorResponse(
+                "Internal server error",
+                ex.getMessage(),
+                LocalDateTime.now()
         ));
     }
 }

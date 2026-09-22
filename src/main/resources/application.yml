@@ -33,7 +33,7 @@ spring:
         options:
           model: ${SPRING_AI_OPENAI_MODEL:llama3}
           temperature: 0.0
-
+debug: true
 logging:
   level:
     ru.saratov.texttosql: DEBUG

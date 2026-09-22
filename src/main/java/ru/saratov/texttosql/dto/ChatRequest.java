@@ -1,14 +1,13 @@
 package ru.saratov.texttosql.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnalyticsResponse {
+public class ChatRequest {
 
-    private String question;
-    private String answer;
+    private String message;
 }
